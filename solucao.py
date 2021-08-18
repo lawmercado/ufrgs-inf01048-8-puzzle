@@ -36,6 +36,9 @@ class Nodo:
     def custo(self) -> int:
         return self.__custo
 
+    def __str__(self):
+        return "(%s, %s, %s, %d)" % (self.estado, self.pai.estado, self.acao, self.custo)
+
 
 def __string_para_array(estado: str) -> np.ndarray:
     return np.array(list(estado), dtype=str).reshape((3, 3))
@@ -92,18 +95,23 @@ def sucessor(estado: str) -> List[Tuple[str, str]]:
     return estados
 
 
-def expande(nodo: Nodo):
+def expande(nodo: Nodo) -> List[Nodo]:
     """
     Recebe um nodo (objeto da classe Nodo) e retorna um iterable de nodos.
     Cada nodo do iterable é contém um estado sucessor do nó recebido.
     :param nodo: objeto da classe Nodo
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+
+    filhos = []
+
+    for acao, estado in sucessor(nodo.estado):
+        filhos.append(Nodo(estado, nodo, acao, nodo.custo + 1))
+
+    return filhos
 
 
-def bfs(estado):
+def bfs(estado: str) -> List[str]:
     """
     Recebe um estado (string), executa a busca em LARGURA e
     retorna uma lista de ações que leva do
@@ -116,7 +124,7 @@ def bfs(estado):
     raise NotImplementedError
 
 
-def dfs(estado):
+def dfs(estado: str) -> List[str]:
     """
     Recebe um estado (string), executa a busca em PROFUNDIDADE e
     retorna uma lista de ações que leva do
@@ -129,7 +137,7 @@ def dfs(estado):
     raise NotImplementedError
 
 
-def astar_hamming(estado):
+def astar_hamming(estado: str) -> List[str]:
     """
     Recebe um estado (string), executa a busca A* com h(n) = soma das distâncias de Hamming e
     retorna uma lista de ações que leva do
@@ -142,7 +150,7 @@ def astar_hamming(estado):
     raise NotImplementedError
 
 
-def astar_manhattan(estado):
+def astar_manhattan(estado: str) -> List[str]:
     """
     Recebe um estado (string), executa a busca A* com h(n) = soma das distâncias de Manhattan e
     retorna uma lista de ações que leva do
