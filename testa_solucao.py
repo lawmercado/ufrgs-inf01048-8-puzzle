@@ -41,12 +41,38 @@ class TestaSolucao(unittest.TestCase):
         :return:
         """
         # no estado 2_3541687, a solucao otima tem 23 movimentos.
-        self.assertEqual(23, len(solucao.bfs("2_3541687")))
-        print("Atencao! O BFS passar nesse teste apenas significa que a lista retornada tem o "
-              "numero correto de elementos. Nao verificamos se as acoes levam para a solucao!")
+        caminho_otimo = solucao.bfs("2_3541687")
+        self.assertEqual(23, len(caminho_otimo))
+        self.assertEqual("12345678_", solucao.executa_caminho("2_3541687", caminho_otimo))
+
+        caminho_vazio = solucao.bfs("12345678_")
+        self.assertEqual(0, len(caminho_vazio))
+        self.assertEqual("12345678_", solucao.executa_caminho("12345678_", caminho_vazio))
 
         # nao ha solucao a partir do estado 185423_67
-        self.assertIsNone(solucao.bfs("185423_67"))
+        caminho_sem_solucao = solucao.bfs("185423_67")
+        self.assertIsNone(caminho_sem_solucao)
+        self.assertIsNone(solucao.executa_caminho("12345678_", caminho_sem_solucao))
+
+    def test_dfs(self):
+        """
+        Testa o DFS em um estado sem solucao pq ele nao e' obrigado
+        a retornar o caminho minimo. Verifica se a solução encontrada leva ao estado final.
+        :param estado: str
+        :return:
+        """
+
+        caminho = solucao.dfs("2_3541687")
+        self.assertEqual("12345678_", solucao.executa_caminho("2_3541687", caminho))
+
+        caminho_vazio = solucao.dfs("12345678_")
+        self.assertEqual(0, len(caminho_vazio))
+        self.assertEqual("12345678_", solucao.executa_caminho("12345678_", caminho_vazio))
+
+        # nao ha solucao a partir do estado 185423_67
+        caminho_sem_solucao = solucao.dfs("185423_67")
+        self.assertIsNone(caminho_sem_solucao)
+        self.assertIsNone(solucao.executa_caminho("12345678_", caminho_sem_solucao))
 
     def test_astar_hamming(self):
         """
@@ -54,12 +80,18 @@ class TestaSolucao(unittest.TestCase):
         :return:
         """
         # no estado 2_3541687, a solucao otima tem 23 movimentos.
-        self.assertEqual(23, len(solucao.astar_hamming("2_3541687")))
-        print("Atencao! O A* Hamming passar nesse teste apenas significa que a lista retornada tem o "
-              "numero correto de elementos. Nao verificamos se as acoes levam para a solucao!")
+        caminho_otimo = solucao.astar_hamming("2_3541687")
+        self.assertEqual(23, len(caminho_otimo))
+        self.assertEqual("12345678_", solucao.executa_caminho("2_3541687", caminho_otimo))
+
+        caminho_vazio = solucao.astar_hamming("12345678_")
+        self.assertEqual(0, len(caminho_vazio))
+        self.assertEqual("12345678_", solucao.executa_caminho("12345678_", caminho_vazio))
 
         # nao ha solucao a partir do estado 185423_67
-        self.assertIsNone(solucao.astar_hamming("185423_67"))
+        caminho_sem_solucao = solucao.astar_hamming("185423_67")
+        self.assertIsNone(caminho_sem_solucao)
+        self.assertIsNone(solucao.executa_caminho("12345678_", caminho_sem_solucao))
 
     def test_astar_manhattan(self):
         """
@@ -67,22 +99,18 @@ class TestaSolucao(unittest.TestCase):
         :return:
         """
         # no estado 2_3541687, a solucao otima tem 23 movimentos.
-        self.assertEqual(23, len(solucao.astar_manhattan("2_3541687")))
-        print("Atencao! O A* Manhattan passar nesse teste apenas significa que a lista retornada tem o "
-              "numero correto de elementos. Nao verificamos se as acoes levam para a solucao!")
+        caminho_otimo = solucao.astar_manhattan("2_3541687")
+        self.assertEqual(23, len(caminho_otimo))
+        self.assertEqual("12345678_", solucao.executa_caminho("2_3541687", caminho_otimo))
+
+        caminho_vazio = solucao.astar_manhattan("12345678_")
+        self.assertEqual(0, len(caminho_vazio))
+        self.assertEqual("12345678_", solucao.executa_caminho("12345678_", caminho_vazio))
 
         # nao ha solucao a partir do estado 185423_67
-        self.assertIsNone(solucao.astar_manhattan("185423_67"))
-
-    def test_dfs(self):
-        """
-        Testa o DFS apenas em um estado sem solucao pq ele nao e' obrigado
-        a retornar o caminho minimo
-        :param estado: str
-        :return:
-        """
-        # nao ha solucao a partir do estado 185423_67
-        self.assertEqual(None, solucao.astar_manhattan("185423_67"))
+        caminho_sem_solucao = solucao.astar_manhattan("185423_67")
+        self.assertIsNone(caminho_sem_solucao)
+        self.assertIsNone(solucao.executa_caminho("12345678_", caminho_sem_solucao))
 
 
 if __name__ == '__main__':
