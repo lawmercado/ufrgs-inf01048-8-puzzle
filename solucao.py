@@ -1,5 +1,7 @@
 from collections import deque
-from typing import List, Tuple, Callable, Deque
+from heapq import heappop, heappush
+from typing import Callable, Deque, List, Tuple
+
 import numpy as np
 
 
@@ -35,8 +37,24 @@ class Nodo:
     def custo(self) -> int:
         return self.__custo
 
+    @custo.setter
+    def custo(self, value):
+        self.__custo = value
+
+    def _custo_prioridades(self):
+        return self._h() + self._g()
+    
+    def _h(self):
+        return distancia_hamming(self.estado)
+
+    def _g(self):
+        return self.custo
+
     def __str__(self):
         return "(%s, %s, %s, %d)" % (self.estado, self.pai.estado, self.acao, self.custo)
+    
+    def __lt__(self, other):
+        return self._custo_prioridades() < other._custo_prioridades()
 
 
 def __string_para_array(estado: str) -> np.ndarray:
@@ -233,8 +251,13 @@ def astar_hamming(estado: str) -> List[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+
+    def retira(fronteira): # TODO: Usar typehinting na classe customizada FilaPrioridade
+        v = fronteira.pop()
+
+        return v, fronteira
+
+    return __busca_grafo_prioridades(estado, retira)
 
 
 def astar_manhattan(estado: str) -> List[str]:
@@ -248,3 +271,69 @@ def astar_manhattan(estado: str) -> List[str]:
     """
     # substituir a linha abaixo pelo seu codigo
     raise NotImplementedError
+
+def __busca_grafo_prioridades(estado_incial: str, retira,
+                  estado_objetivo="12345678_") -> List[str] or None:
+    """
+    Busca num grafo o estado_final partindo do estado_inicial, usando a função retira para remover
+    itens da fronteira. Retorna o caminho do estado_inicial até o estado_final se este existir;
+    None caso o contrário.
+
+    :param estado_incial: str
+    :param retira: callable, função que remove um item da fronteira
+    :param estado_objetivo: str, optional
+    :return:
+    """
+
+    explorados = set()  # Ordem não importa
+    fronteira = FilaPrioridade()
+    fronteira.push(Nodo(estado_incial, None, None, 0))
+
+    while len(fronteira) > 0:
+        v, fronteira = retira(fronteira)
+
+        if v.estado == estado_objetivo:
+            return __obter_caminho(v)
+
+        if v.estado not in explorados:
+            explorados.add(v.estado)
+            expande_nodos = expande(v)
+            for value in expande_nodos:
+                value.custo = len(fronteira)
+                fronteira.push(value)
+
+    return None
+
+def distancia_hamming(inicial, objetivo="12345678_" ):
+    """
+    computa o número de peças fora do lugar, dado um estado inicial e final
+
+    :param inicial: str
+    :param objetivo: str, optional
+    :return:
+    """
+
+    count = 0
+    for index, value in enumerate(objetivo):
+        if inicial[index] != objetivo[index]:
+            count += 1
+
+    return count
+
+class FilaPrioridade:
+    """
+    classe que encapsula métodos do módulo python heapq - Heap queue algorithm: 
+    https://docs.python.org/3/library/heapq.html
+
+    """
+    def __init__(self):
+        self.fila = []
+
+    def push(self, item):
+        heappush(self.fila, item)
+    
+    def pop(self):
+        return heappop(self.fila)
+    
+    def __len__(self):
+        return len(self.fila)
