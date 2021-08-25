@@ -45,9 +45,9 @@ class Nodo:
         return "(%s, %s, %s, %d)" % (self.estado, self.pai.estado, self.acao, self.custo)
     
     def __lt__(self, other):
-        return self._custo_prioridades() < other._custo_prioridades()
+        return self.custo_prioridades() < other.custo_prioridades()
 
-    def _custo_prioridades(self):
+    def custo_prioridades(self):
         return self._h() + self._g()   
     
     def _h(self):
@@ -56,9 +56,9 @@ class Nodo:
     def _g(self):
         return self.custo
     
-    def _distancia_hamming(self, inicial, objetivo="12345678_" ):
+    def _distancia_hamming(self, inicial: str, objetivo: str = "12345678_"):
         """
-        computa o número de peças fora do lugar, dado um estado inicial e final
+        Computa o número de peças fora do lugar, dado um estado inicial e final.
 
         :param inicial: str
         :param objetivo: str, optional
@@ -72,19 +72,20 @@ class Nodo:
 
         return count
 
+
 class FilaPrioridade:
     """
-    classe que encapsula métodos do módulo python heapq - Heap queue algorithm: 
+    Encapsula métodos do módulo python heapq - Heap queue algorithm:
     https://docs.python.org/3/library/heapq.html
 
     """
     def __init__(self):
         self.fila = []
 
-    def push(self, item):
+    def push(self, item: Nodo):
         heappush(self.fila, item)
     
-    def pop(self):
+    def pop(self) -> Nodo:
         return heappop(self.fila)
     
     def __len__(self):
@@ -156,7 +157,6 @@ def expande(nodo: Nodo) -> List[Nodo]:
     return filhos
 
 
-
 def bfs(estado: str) -> List[str]:
     """
     Recebe um estado (string), executa a busca em LARGURA e
@@ -203,7 +203,7 @@ def astar_hamming(estado: str) -> List[str]:
     :return:
     """
 
-    def retira(fronteira): # TODO: Usar typehinting na classe customizada FilaPrioridade
+    def retira(fronteira: FilaPrioridade) -> Tuple[Nodo, FilaPrioridade]:
         v = fronteira.pop()
 
         return v, fronteira
@@ -252,8 +252,8 @@ def executa_caminho(estado_inicial: str, caminho: List[str]) -> str or None:
     return nodo.estado
     
 
-def _busca_grafo_prioridades(estado_incial: str, retira,
-                  estado_objetivo="12345678_") -> List[str] or None:
+def _busca_grafo_prioridades(estado_incial: str, retira: Callable[[FilaPrioridade], Tuple[Nodo, FilaPrioridade]],
+                             estado_objetivo="12345678_") -> List[str] or None:
     """
     Busca num grafo o estado_final partindo do estado_inicial, usando a função retira para remover
     itens da fronteira. Retorna o caminho do estado_inicial até o estado_final se este existir;
@@ -277,16 +277,16 @@ def _busca_grafo_prioridades(estado_incial: str, retira,
 
         if v.estado not in explorados:
             explorados.add(v.estado)
-            expande_nodos = expande(v)
-            for value in expande_nodos:
-                value.custo = len(fronteira)
-                fronteira.push(value)
+
+            for nodo in expande(v):
+                nodo.custo = len(fronteira)
+                fronteira.push(nodo)
 
     return None
 
 
 def _busca_grafo(estado_incial: str, retira: Callable[[Deque[Nodo]], Tuple[Nodo, Deque[Nodo]]],
-                  estado_objetivo="12345678_") -> List[str] or None:
+                 estado_objetivo="12345678_") -> List[str] or None:
     """
     Busca num grafo o estado_final partindo do estado_inicial, usando a função retira para remover
     itens da fronteira. Retorna o caminho do estado_inicial até o estado_final se este existir;
@@ -313,6 +313,7 @@ def _busca_grafo(estado_incial: str, retira: Callable[[Deque[Nodo]], Tuple[Nodo,
             fronteira.extend(expande(v))
 
     return None
+
 
 def _string_para_array(estado: str) -> np.ndarray:
     return np.array(list(estado), dtype=str).reshape((3, 3))
