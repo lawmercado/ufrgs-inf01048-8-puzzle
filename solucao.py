@@ -56,7 +56,7 @@ class Nodo:
     def _g(self):
         return self.custo
     
-    def _distancia_hamming(self, inicial: str, objetivo: str = "12345678_"):
+    def _distancia_hamming(self, inicial: str, objetivo: str = "12345678_") -> int:
         """
         Computa o número de peças fora do lugar, dado um estado inicial e final.
 
@@ -71,6 +71,19 @@ class Nodo:
                 count += 1
 
         return count
+
+    def _distancia_manhattan(self, estado: str, estado_objetivo="12345678_") -> int:
+        distancia_manhattan = 0
+        obj_array = _string_para_array(estado_objetivo)
+        current = _string_para_array(estado)
+
+        for i in range(3):
+            for j in range(3):
+                if current[i][j] != '_' and current[i][j] != obj_array[i][j]:
+                    index_x, index_y = np.where(obj_array == current[i][j])
+                    distancia_manhattan += abs(i - index_x) + abs(j - index_y)
+
+        return distancia_manhattan
 
 
 class FilaPrioridade:
@@ -340,18 +353,3 @@ def _obter_caminho(nodo: Nodo) -> List[str]:
     caminho.reverse()
 
     return caminho
-
-def _distancia_manhattan(estado: str, estado_objetivo="12345678_"):
-    manhattan_distance = 0
-    obj_array = _string_para_array(estado_objetivo)
-    current = _string_para_array(estado)
-
-    for i in range(3):
-        for j in range(3):
-            if current[i][j] != '_' and current[i][j] != obj_array[i][j]:
-                print("fora do lugar!", current[i][j])
-                index = np.where(obj_array == current[i][j])
-                # TODO
-                # manhattan_distance += abs(i - index_x) + abs(j - index_y)
-
-    return manhattan_distance
