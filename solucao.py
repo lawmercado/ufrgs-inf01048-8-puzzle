@@ -210,7 +210,7 @@ def astar_hamming(estado: str) -> List[str]:
     return _busca_grafo_prioridades(estado, retira, prioridade)
 
 
-def distancia_manhattan(estado: str, estado_objetivo="12345678_") -> int:
+def distancia_manhattan(estado: str, estado_objetivo: str = "12345678_") -> int:
     distancia = 0
 
     for i_estado, i_estado_objetivo in ((estado.index(str(i)), estado_objetivo.index(str(i))) for i in range(1, 9)):
@@ -270,7 +270,8 @@ def executa_caminho(estado_inicial: str, caminho: List[str]) -> str or None:
     
 
 def _busca_grafo_prioridades(estado_incial: str, retira: Callable[[FilaPrioridade], Tuple[Nodo, FilaPrioridade]],
-                             prioridade: Callable[[Nodo], int], estado_objetivo="12345678_") -> List[str] or None:
+                             prioridade: Callable[[Nodo], int],
+                             estado_objetivo: str = "12345678_") -> List[str] or None:
     """
     Busca num grafo o estado_final partindo do estado_inicial, usando a função retira para remover
     itens da fronteira. Retorna o caminho do estado_inicial até o estado_final se este existir;
@@ -290,6 +291,8 @@ def _busca_grafo_prioridades(estado_incial: str, retira: Callable[[FilaPrioridad
         v, fronteira = retira(fronteira)
 
         if v.estado == estado_objetivo:
+            print("Num. nós explorados:", len(explorados))
+
             return _obter_caminho(v)
 
         if v.estado not in explorados:
@@ -303,7 +306,7 @@ def _busca_grafo_prioridades(estado_incial: str, retira: Callable[[FilaPrioridad
 
 
 def _busca_grafo(estado_incial: str, retira: Callable[[Deque[Nodo]], Tuple[Nodo, Deque[Nodo]]],
-                 estado_objetivo="12345678_") -> List[str] or None:
+                 estado_objetivo: str = "12345678_") -> List[str] or None:
     """
     Busca num grafo o estado_final partindo do estado_inicial, usando a função retira para remover
     itens da fronteira. Retorna o caminho do estado_inicial até o estado_final se este existir;
@@ -323,6 +326,8 @@ def _busca_grafo(estado_incial: str, retira: Callable[[Deque[Nodo]], Tuple[Nodo,
         v, fronteira = retira(fronteira)
 
         if v.estado == estado_objetivo:
+            print("Num. nós explorados:", len(explorados))
+
             return _obter_caminho(v)
 
         if v.estado not in explorados:
