@@ -1,3 +1,4 @@
+import itertools
 from collections import deque
 from heapq import heappop, heappush
 from typing import Callable, Deque, List, Tuple
@@ -38,52 +39,15 @@ class Nodo:
         return self.__custo
 
     @custo.setter
-    def custo(self, value):
-        self.__custo = value
+    def custo(self, valor):
+        self.__custo = valor
     
     def __str__(self):
-        return "(%s, %s, %s, %d)" % (self.estado, self.pai.estado, self.acao, self.custo)
-    
-    def __lt__(self, other):
-        return self.custo_prioridades() < other.custo_prioridades()
-
-    def custo_prioridades(self):
-        return self._h() + self._g()   
-    
-    def _h(self):
-        return self._distancia_hamming(self.estado)
-
-    def _g(self):
-        return self.custo
-    
-    def _distancia_hamming(self, inicial: str, objetivo: str = "12345678_") -> int:
-        """
-        Computa o número de peças fora do lugar, dado um estado inicial e final.
-
-        :param inicial: str
-        :param objetivo: str, optional
-        :return:
-        """
-
-        count = 0
-        for index, value in enumerate(objetivo):
-            if inicial[index] != objetivo[index]:
-                count += 1
-
-        return count
-
-    def _distancia_manhattan(self, estado: str, estado_objetivo="12345678_") -> int:
-        distancia_manhattan = 0
-        obj_array = _string_para_array(estado_objetivo)
-        current = _string_para_array(estado)
-
-        for i in range(3):
-            for j in range(3):
-                if current[i][j] != '_' and current[i][j] != obj_array[i][j]:
-                    index_x, index_y = np.where(obj_array == current[i][j])
-                    distancia_manhattan += abs(i - index_x) + abs(j - index_y)
-
-        return distancia_manhattan
+        return "Nodo (estado: %s, pai: %s, acao: %s, custo: %d)" %\
+               (self.estado,
+                self.pai.estado if self.pai else "<raiz>",
+                self.acao if self.acao else "<raiz>",
+                self.custo)
 
 
 class FilaPrioridade:
@@ -92,17 +56,26 @@ class FilaPrioridade:
     https://docs.python.org/3/library/heapq.html
 
     """
-    def __init__(self):
-        self.fila = []
+    def __init__(self, prioridade: Callable[[Nodo], int]):
+        self._fila = []
+        self._prioridade = prioridade
+        self._contador = itertools.count()
 
-    def push(self, item: Nodo):
-        heappush(self.fila, item)
+    def push(self, nodo: Nodo):
+        """
+        Adiciona um nodo ao heap. Para decidir a prioridade, uma função é informada.
+        Além disso, para critério de desempate é usado um contador, conforme sugerido na documentação.
+
+        :param nodo: Nodo
+        :return:
+        """
+        heappush(self._fila, (self._prioridade(nodo), next(self._contador), nodo))
     
     def pop(self) -> Nodo:
-        return heappop(self.fila)
+        return heappop(self._fila)[-1]
     
     def __len__(self):
-        return len(self.fila)
+        return len(self._fila)
 
 
 def sucessor(estado: str) -> List[Tuple[str, str]]:
@@ -206,6 +179,16 @@ def dfs(estado: str) -> List[str]:
     return _busca_grafo(estado, retira)
 
 
+def distancia_hamming(estado: str, estado_objetivo: str = "12345678_") -> int:
+    distancia = 0
+
+    for i in range(len(estado_objetivo)):
+        if estado[i] != estado_objetivo[i]:
+            distancia += 1
+
+    return distancia
+
+
 def astar_hamming(estado: str) -> List[str]:
     """
     Recebe um estado (string), executa a busca A* com h(n) = soma das distâncias de Hamming e
@@ -221,7 +204,19 @@ def astar_hamming(estado: str) -> List[str]:
 
         return v, fronteira
 
-    return _busca_grafo_prioridades(estado, retira)
+    def prioridade(nodo: Nodo) -> int:
+        return nodo.custo + distancia_hamming(nodo.estado)
+
+    return _busca_grafo_prioridades(estado, retira, prioridade)
+
+
+def distancia_manhattan(estado: str, estado_objetivo="12345678_") -> int:
+    distancia = 0
+
+    for i_estado, i_estado_objetivo in ((estado.index(str(i)), estado_objetivo.index(str(i))) for i in range(1, 9)):
+        distancia += abs(i_estado % 3 - i_estado_objetivo % 3) + abs(i_estado // 3 - i_estado_objetivo // 3)
+
+    return distancia
 
 
 def astar_manhattan(estado: str) -> List[str]:
@@ -234,8 +229,16 @@ def astar_manhattan(estado: str) -> List[str]:
     :return:
     
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+
+    def retira(fronteira: FilaPrioridade) -> Tuple[Nodo, FilaPrioridade]:
+        v = fronteira.pop()
+
+        return v, fronteira
+
+    def prioridade(nodo: Nodo) -> int:
+        return nodo.custo + distancia_manhattan(nodo.estado)
+
+    return _busca_grafo_prioridades(estado, retira, prioridade)
 
 
 def executa_caminho(estado_inicial: str, caminho: List[str]) -> str or None:
@@ -267,7 +270,7 @@ def executa_caminho(estado_inicial: str, caminho: List[str]) -> str or None:
     
 
 def _busca_grafo_prioridades(estado_incial: str, retira: Callable[[FilaPrioridade], Tuple[Nodo, FilaPrioridade]],
-                             estado_objetivo="12345678_") -> List[str] or None:
+                             prioridade: Callable[[Nodo], int], estado_objetivo="12345678_") -> List[str] or None:
     """
     Busca num grafo o estado_final partindo do estado_inicial, usando a função retira para remover
     itens da fronteira. Retorna o caminho do estado_inicial até o estado_final se este existir;
@@ -280,7 +283,7 @@ def _busca_grafo_prioridades(estado_incial: str, retira: Callable[[FilaPrioridad
     """
 
     explorados = set()  # Ordem não importa
-    fronteira = FilaPrioridade()
+    fronteira = FilaPrioridade(prioridade=prioridade)
     fronteira.push(Nodo(estado_incial, None, None, 0))
 
     while len(fronteira) > 0:

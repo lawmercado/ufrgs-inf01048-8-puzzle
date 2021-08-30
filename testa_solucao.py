@@ -5,7 +5,8 @@ import solucao as solucao
 class TestaSolucao(unittest.TestCase):
     def test_sucessor(self):
         """
-        Testa a funcao sucessor para o estado "2_3541687"
+        Testa a funcao sucessor para o estado "2_3541687".
+
         :return:
 
         """
@@ -19,7 +20,8 @@ class TestaSolucao(unittest.TestCase):
 
     def test_expande(self):
         """
-        Testa a função expande para um Node com estado "185432_67" e custo 2
+        Testa a função expande para um Node com estado "185432_67" e custo 2.
+
         :return:
         """
         pai = solucao.Nodo("185432_67", None, "abaixo", 2)  # o pai do pai esta incorreto, mas nao interfere no teste
@@ -37,7 +39,9 @@ class TestaSolucao(unittest.TestCase):
 
     def test_bfs(self):
         """
-        Testa o BFS em um estado com solução e outro sem solução
+        Testa o BFS em um estado com solução e outro sem solução. Verifica se a solução encontrada leva ao estado final.
+        Testa também o caso de o estado inicial já ser a solução.
+
         :return:
         """
         # no estado 2_3541687, a solucao otima tem 23 movimentos.
@@ -58,6 +62,8 @@ class TestaSolucao(unittest.TestCase):
         """
         Testa o DFS em um estado sem solucao pq ele nao e' obrigado
         a retornar o caminho minimo. Verifica se a solução encontrada leva ao estado final.
+        Testa também o caso de o estado inicial já ser a solução.
+
         :param estado: str
         :return:
         """
@@ -74,9 +80,22 @@ class TestaSolucao(unittest.TestCase):
         self.assertIsNone(caminho_sem_solucao)
         self.assertIsNone(solucao.executa_caminho("12345678_", caminho_sem_solucao))
 
+    def test_distancia_hamming(self):
+        """
+        Testa o cálculo da distância Hamming.
+
+        :return:
+        """
+        distancia = solucao.distancia_hamming("7245_6831")
+
+        self.assertEqual(distancia, 7)
+
     def test_astar_hamming(self):
         """
-        Testa o A* com dist. Hamming em um estado com solução e outro sem solução
+        Testa o A* com dist. Hamming em um estado com solução e outro sem solução.
+        Verifica se a solução encontrada leva ao estado final.
+        Testa também o caso de o estado inicial já ser a solução.
+
         :return:
         """
         # no estado 2_3541687, a solucao otima tem 23 movimentos.
@@ -93,9 +112,21 @@ class TestaSolucao(unittest.TestCase):
         self.assertIsNone(caminho_sem_solucao)
         self.assertIsNone(solucao.executa_caminho("12345678_", caminho_sem_solucao))
 
+    def test_distancia_manhattan(self):
+        """
+        Testa o cálculo da distância Manhattan.
+
+        :return:
+        """
+        distancia = solucao.distancia_manhattan("7245_6831")
+        self.assertEqual(distancia, 14)
+
     def test_astar_manhattan(self):
         """
-        Testa o A* com dist. Manhattan em um estado com solução e outro sem solução
+        Testa o A* com dist. Manhattan em um estado com solução e outro sem solução.
+        Verifica se a solução encontrada leva ao estado final.
+        Testa também o caso de o estado inicial já ser a solução.
+
         :return:
         """
         # no estado 2_3541687, a solucao otima tem 23 movimentos.
